@@ -1,0 +1,156 @@
+<!-- frontend/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Programming Languages Usage Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="hero">
+        <div class="hero-content">
+            <h1> Programming Languages Usage Dashboard</h1>
+            <p>Unveil the Evolution of Programming Languages</p>
+        </div>
+        <div class="cube-3d">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="card-3d">
+            <div class="chart-container">
+                <canvas id="myChart"></canvas>
+            </div>
+        </div>
+        <div id="error-message"></div>
+    </div>
+
+    <script>
+        async function loadChart() {
+            const errorDiv = document.getElementById('error-message');
+            try {
+                const response = await fetch('http://127.0.0.1:5000/data');
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
+
+                const labels = data.map(item => item.tag_name);
+                const values2023 = data.map(item => parseFloat(item['2023.0']));
+                const values2024 = data.map(item => parseFloat(item['2024.0']));
+                const values2025 = data.map(item => parseFloat(item['2025.0']));
+
+                const ctx = document.getElementById('myChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: '2023',
+                                data: values2023,
+                                backgroundColor: '#FF6B6B',
+                                borderColor: '#FF4D4D',
+                                borderWidth: 1,
+                                barThickness: 20,
+                            },
+                            {
+                                label: '2024',
+                                data: values2024,
+                                backgroundColor: '#4ECDC4',
+                                borderColor: '#45B7AA',
+                                borderWidth: 1,
+                                barThickness: 20,
+                            },
+                            {
+                                label: '2025',
+                                data: values2025,
+                                backgroundColor: '#FFD93D',
+                                borderColor: '#FFC107',
+                                borderWidth: 1,
+                                barThickness: 20,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Language Usage Trends (2023-2025)',
+                                font: { size: 28, weight: 'bold', family: 'Poppins' },
+                                color: '#fff',
+                                padding: { top: 20, bottom: 20 }
+                            },
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    font: { size: 16, family: 'Poppins' },
+                                    color: '#fff',
+                                    padding: 20,
+                                    usePointStyle: true
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0,0,0,0.9)',
+                                titleFont: { size: 16 },
+                                bodyFont: { size: 14 },
+                                cornerRadius: 8
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Programming Languages',
+                                    font: { size: 18, family: 'Poppins' },
+                                    color: '#fff'
+                                },
+                                ticks: {
+                                    color: '#fff',
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                },
+                                grid: { display: false }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Uses',
+                                    font: { size: 18, family: 'Poppins' },
+                                    color: '#fff'
+                                },
+                                ticks: {
+                                    color: '#fff',
+                                    stepSize: 20000,
+                                    callback: value => `${value / 1000}k`
+                                },
+                                grid: {
+                                    color: 'rgba(255,255,255,0.2)',
+                                    borderDash: [5, 5]
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 2000,
+                            easing: 'easeOutElastic'
+                        }
+                    }
+                });
+            } catch (error) {
+                errorDiv.textContent = `Error: ${error.message}`;
+                console.error('Error:', error);
+            }
+        }
+
+        window.onload = loadChart;
+    </script>
+</body>
+</html>
